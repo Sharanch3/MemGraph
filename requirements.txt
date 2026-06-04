@@ -1,0 +1,20 @@
+langchain
+langchain-core
+langchain-community
+langchain-tavily
+langchain-huggingface
+langchain-chroma
+langchain-experimental
+chroma
+
+pypdf
+# sentence-transformers
+# torch
+# torchvision
+
+langgraph
+langgraph-checkpoint-sqlite
+
+ipykernel
+python-dotenv
+streamlit

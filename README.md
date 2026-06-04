@@ -2,9 +2,9 @@
 
 # 🤖 MemGraph
 
-**A production-ready, stateful agentic AI assistant**
+**A production-ready, Stateful Agentic AI Assistant**
 
-*Short-term summarization · Long-term memory · Multi-thread chat · Tool use · PostgreSQL persistence*
+*Short-term memory · Long-term memory · Multi-thread chat · Tool use · PostgreSQL persistence · LangSmith observability*
 
 ---
 
@@ -14,6 +14,7 @@
 ![Streamlit](https://img.shields.io/badge/Streamlit-UI-FF4B4B?style=flat-square&logo=streamlit&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-4169E1?style=flat-square&logo=postgresql&logoColor=white)
 ![Anthropic](https://img.shields.io/badge/Anthropic-Claude-D97757?style=flat-square&logo=anthropic&logoColor=white)
+![LangSmith](https://img.shields.io/badge/LangSmith-Observability-F5A623?style=flat-square&logo=langchain&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-22C55E?style=flat-square)
 ![Status](https://img.shields.io/badge/Status-Production%20Ready-22C55E?style=flat-square)
 
@@ -42,6 +43,7 @@ Most LLM chatbots are **stateless by default** — every conversation starts fro
 - 🖥️ **Streamlit UI** — Clean chat interface with sidebar thread management, streaming responses, and live tool-use indicators
 - 💬 **Multi-Thread Support** — Create, switch, and resume unlimited parallel conversation threads per user
 - 🔗 **URL-Persistent Identity** — `?uid=` query param embeds user identity in the URL — shareable and survives browser clears
+- 🔭 **LangSmith Observability** — Full trace of every graph run: node-level spans, token usage, latency, injected prompts, and tool I/O
 
 ---
 
@@ -164,6 +166,11 @@ Create a `.env` file in the project root:
 ```env
 DATABASE_URI=postgresql://user:password@localhost:5432/chatbot_db
 ANTHROPIC_API_KEY=your_api_key_here
+
+# LangSmith observability (optional but recommended)
+LANGCHAIN_TRACING_V2=true
+LANGCHAIN_API_KEY=your_langsmith_api_key
+LANGCHAIN_PROJECT=memgraph
 ```
 
 ### 4. Set up the database
@@ -185,6 +192,42 @@ Open `http://localhost:8501` — your user ID is appended automatically (`?uid=.
 
 ---
 
+## 🔭 Observability with LangSmith
+
+MemGraph integrates with [LangSmith](https://smith.langchain.com) for full tracing of every graph run — zero code changes required. LangGraph auto-detects the env vars and instruments everything automatically.
+
+### Setup
+
+Add the following to your `.env`:
+
+```env
+LANGCHAIN_TRACING_V2=true
+LANGCHAIN_API_KEY=your_langsmith_api_key
+LANGCHAIN_PROJECT=memgraph
+```
+
+Optionally, name your compiled graph for cleaner trace labels in `backend/ltm_graph.py`:
+
+```python
+graph = builder.compile(
+    checkpointer=checkpointer,
+    name="MemGraph"          # appears as the run name in LangSmith
+)
+```
+
+### What you get
+
+| Signal | Details |
+|--------|---------|
+| **Graph traces** | Every run as a tree — each node (`summary_node`, `chat_node`, `tool_node`, `memory_write_node`) is a labelled span |
+| **LLM call inspection** | Exact prompt sent to the model at `chat_node` — see what memory + summary was injected |
+| **Token usage & latency** | Per-node breakdown of input/output tokens and wall-clock time |
+| **Tool call I/O** | Inputs and outputs for every tool invocation |
+| **Error traces** | Full stack trace when any node fails, with the state that caused it |
+| **Feedback & evals** | Tag runs, leave human feedback, and run automated evaluations from the LangSmith UI |
+
+---
+
 ## 📦 Tech Stack
 
 | Package | Purpose |
@@ -195,6 +238,7 @@ Open `http://localhost:8501` — your user ID is appended automatically (`?uid=.
 | ![PostgreSQL](https://img.shields.io/badge/-langgraph--checkpoint--postgres-4169E1?style=flat-square&logo=postgresql&logoColor=white) | Persistent conversation checkpoints |
 | ![PostgreSQL](https://img.shields.io/badge/-langgraph--store--postgres-4169E1?style=flat-square&logo=postgresql&logoColor=white) | Persistent long-term memory store |
 | ![Python](https://img.shields.io/badge/-python--dotenv-3776AB?style=flat-square&logo=python&logoColor=white) | Environment variable management |
+| ![LangSmith](https://img.shields.io/badge/-LangSmith-F5A623?style=flat-square&logo=langchain&logoColor=white) | Tracing, observability & evals |
 
 ---
 

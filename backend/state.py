@@ -1,15 +1,19 @@
+from typing import Annotated, List, TypedDict
 from langchain_core.messages import BaseMessage
-from typing import TypedDict, Annotated, List
 from langgraph.graph.message import add_messages
+
 
 
 
 class ChatState(TypedDict):
 
+    user_id: str
+
     messages: Annotated[List[BaseMessage], add_messages]
 
-    summary: str
+    summary: str | None
 
     kept_messages: List[BaseMessage]
 
-    user_id: str
+
+

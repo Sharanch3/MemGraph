@@ -1,11 +1,12 @@
 import os
 import requests
-from backend.base_model import model
 from langchain_core.tools import tool
+from backend.base_model import base_model
 from langchain_tavily import TavilySearch
+from langgraph.prebuilt import ToolNode
 from langchain_experimental.tools import PythonREPLTool
-from dotenv import load_dotenv
-load_dotenv()
+
+
 
 
 
@@ -19,6 +20,7 @@ def fetch_weather(place: str) ->dict:
     response = requests.get(url= url)
 
     return response.json()
+
 
 
 
@@ -44,6 +46,7 @@ python_tool = PythonREPLTool()
 
 
 
+
 #WEB SEARCH
 search_tool = TavilySearch(
     max_results = 2,
@@ -52,7 +55,13 @@ search_tool = TavilySearch(
 
 
 
-#Tool Binding
-tools = [fetch_weather, get_stock_price, python_tool, search_tool]
 
-model_with_tools = model.bind_tools(tools= tools, tool_choice= "auto")
+#Tool Binding
+TOOLS = [fetch_weather, get_stock_price, python_tool, search_tool]
+
+model_with_tools = base_model.bind_tools(tools= TOOLS)
+
+
+
+#Tool Node
+tool_node = ToolNode(tools= TOOLS)
